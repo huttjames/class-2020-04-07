@@ -23,10 +23,39 @@ Today's class will be based on [Chapter 12: "Multiple Regression"](https://david
 
 **Prompt:** To begin, we are going to go through the three common steps of exploring a new dataset: 1) looking at the raw data, 2) computing summary statistics, and 3) creating visualizations of the data. Scene one will focus on the first two steps. Useful commands to use here: `glimpse()`,`sample_n`, and `skim` (from the skimr package). What observations are surprising? Do you believe this data? What should you check out?
 
+```{r, echo=FALSE}
+
+skim(x)
+
+summary(x)
+
+skim(x)
+
+View(x)
+
+
+```
+
+
 
 ### Scene 2
 
 **Prompt:** What's the correlation between the average faculty salary in 2001 and the median income of students 10 years after entering? What's the correlation between the average SAT scores in 2001 and the median income of students 10 years after entering? Find these by doing two separate correlations first, and then making a correlation matrix (instructions in the book). Hint: Make sure to omit all missing pairs from the two variables while finding the correlation. 
+
+```{r, echo=FALSE}
+
+x %>%
+  summarise(correlation = cor(earnings, faculty))
+
+x %>%
+  summarise(correlation = cor(sat, earnings))
+
+x %>% 
+  select(earnings, sat, faculty) %>%
+  cor()
+
+```
+
 
 
 
@@ -34,15 +63,54 @@ Today's class will be based on [Chapter 12: "Multiple Regression"](https://david
 
 **Prompt:** Visualize the relationships between the outcome variable (`earnings`) and the two key numerical explanatory variables (`faculty` and `sat`), one at a time. Create a ggplot for each showing the line of best fit.
 
+```{r s3, echo=FALSE}
+
+ggplot(x, aes(faculty, earnings)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se=FALSE)
+
+ggplot(x, aes(sat, earnings)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se=FALSE)
+
+```
+
+
 
 ### Scene 4
 
-**Prompt:** Now let's quantify these relationships between the two explanatory variables and the outcome variable. Fit a multiple gression model for `earnings` using `sat` and `faculty`. Write a bullet point interpreting each of the three values in the estimate column.
+**Prompt:** Now let's quantify these relationships between the two explanatory variables and the outcome variable. Fit a multiple regression model for `earnings` using `sat` and `faculty`. Write a bullet point interpreting each of the three values in the estimate column.
+
+```{r s4, echo=FALSE}
+
+model_x <- lm(earnings ~ sat + faculty, data = x)
+
+summary(model_x)
+
+tidy(model_x)
+
+ggplot(x, aes(faculty, earnings, color = sat)) + geom_point()
+
+```
+Sat has a positive value, so as SAT score increases by 1 point estimated earnings increases 24.48 
+Faculty has a positive value so as median faculty salary increases by 1, estimated median earnings increases by 0.38 
+Intercept represents the expected earnings with 0 SAT and 0 faculty salary - it has mathematical but not interpretative significance 
+
 
 
 ### Scene 5
 
 **Prompt:** Imagine that you are the university president. There's a global pandemic that is causing serious financial damage to the school endowment, and in response, you want to cut the financial aid budget. However, because many academically talented students will go to whichever school gives them the best financial aid package, slashing the financial aid budget will cause the average SAT score to decrease from 1400 to 1300. Apply the Rubin Causal Model to estimate the causal effect of SAT scores on students' median earnings. Write down the units, the treatments, and the outcomes. Define the causal effect of `sat` on median earnings. What is the fundamental problem of causal inference? What **must** you assume for this causal model to make a causal claim?
+
+units: individual colleges
+treatments: 100 point downward shock to avg SAT score (caused by cut of financial aid budget)
+outcomes: median earnings 10y later 
+
+causal effect of sat on median earnings: Difference between what median earnings would have been under the old policy (and SAT score) relative to what the median earnings will be under the new policy (and SAT score) 
+
+Problem: Cant observe both worlds - treatment and no treatment for the same unit 
+
+Assumption for this to be causal: There are no other confounding variables which are correlated with the treatment and the outcome other than SAT which differ between the treatment and control sub populations 
 
 
 ### Scene 6
