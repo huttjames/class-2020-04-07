@@ -135,6 +135,13 @@ tibble(`Subject` = c("School A", "School B"),
               bold = TRUE,
               border_right = TRUE)
 
+
+expected_earnings <- function(sat, faculty) {
+  sat * 24.4804028 + faculty * 0.3853723 - 2590.9829154
+}
+
+expected_earnings(1300, 50000)
+expected_earnings(1400, 60000)
 ```
 
 
